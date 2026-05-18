@@ -1,0 +1,277 @@
+@import "tailwindcss";
+
+/* ─── Light theme (default) ─────────────────────────────── */
+:root {
+  --bg-page:        #f1f5f9;
+  --bg-nav:         rgba(248, 250, 252, 0.92);
+  --bg-card:        #ffffff;
+  --bg-surface:     #f8fafc;
+  --bg-surface-h:   #f1f5f9;
+  --bg-input:       #ffffff;
+  --border:         #e2e8f0;
+  --border-subtle:  #f1f5f9;
+  --text-1:         #0f172a;
+  --text-2:         #334155;
+  --text-3:         #64748b;
+  --text-4:         #94a3b8;
+  --input-border:   #cbd5e1;
+  --accent:         #6366f1;
+  --accent-subtle:  rgba(99, 102, 241, 0.1);
+  --danger:         #ef4444;
+  --danger-subtle:  rgba(239, 68, 68, 0.1);
+  --success:        #10b981;
+  --warning:        #f59e0b;
+  --shadow:         0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-lg:      0 10px 25px rgba(0,0,0,0.1);
+  --modal-bg:       rgba(0,0,0,0.4);
+}
+
+/* ─── Dark theme ─────────────────────────────────────────── */
+.dark {
+  --bg-page:        #020617;
+  --bg-nav:         rgba(2, 6, 23, 0.88);
+  --bg-card:        rgba(255, 255, 255, 0.04);
+  --bg-surface:     rgba(255, 255, 255, 0.04);
+  --bg-surface-h:   rgba(255, 255, 255, 0.09);
+  --bg-input:       rgba(255, 255, 255, 0.06);
+  --border:         rgba(255, 255, 255, 0.08);
+  --border-subtle:  rgba(255, 255, 255, 0.04);
+  --text-1:         #f1f5f9;
+  --text-2:         #cbd5e1;
+  --text-3:         #94a3b8;
+  --text-4:         #475569;
+  --input-border:   rgba(255, 255, 255, 0.12);
+  --accent:         #818cf8;
+  --accent-subtle:  rgba(99, 102, 241, 0.15);
+  --danger:         #f87171;
+  --danger-subtle:  rgba(239, 68, 68, 0.15);
+  --success:        #34d399;
+  --warning:        #fbbf24;
+  --shadow:         0 1px 3px rgba(0,0,0,0.4);
+  --shadow-lg:      0 10px 25px rgba(0,0,0,0.5);
+  --modal-bg:       rgba(0, 0, 0, 0.6);
+}
+
+/* ─── Base ───────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { transition: background 0.25s, color 0.25s; }
+
+  body {
+    margin: 0;
+    background: var(--bg-page);
+    color: var(--text-1);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    transition: background 0.25s, color 0.25s;
+  }
+
+  #root { min-height: 100vh; }
+
+  /* Remove browser autofill yellow tint */
+  input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-input) inset !important;
+    -webkit-text-fill-color: var(--text-1) !important;
+    transition: background-color 9999s ease;
+  }
+}
+
+/* ─── Utilities ──────────────────────────────────────────── */
+@layer utilities {
+
+  /* Card */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: var(--shadow-lg); }
+
+  /* Navbar */
+  .navbar-bg {
+    background: var(--bg-nav);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  /* Modal overlay */
+  .modal-overlay {
+    background: var(--modal-bg);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  /* ── Inputs (icon-padding baked in — fixes placeholder overlap) ── */
+  .input-field {
+    background: var(--bg-input);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text-1);
+    /* left: 2.5rem clears the absolute-positioned icon */
+    padding: 10px 14px 10px 2.5rem;
+    width: 100%;
+    outline: none;
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input-field::placeholder { color: var(--text-4); }
+  .input-field:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-subtle);
+  }
+  /* For password fields that also have a right-side eye icon */
+  .input-field.pr-icon { padding-right: 2.75rem; }
+  /* Overrides for error state */
+  .input-field.err { border-color: var(--danger) !important; }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(99,102,241,0.35);
+    transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+  }
+  .btn-primary:hover:not(:disabled) {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(99,102,241,0.45);
+  }
+  .btn-primary:active:not(:disabled) { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-secondary {
+    background: var(--bg-surface);
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .btn-secondary:hover { background: var(--bg-surface-h); color: var(--text-1); }
+
+  .btn-danger {
+    background: var(--danger-subtle);
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
+
+  /* ── Icon action buttons (copy, delete, analytics in cards) ── */
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-3);
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+    text-decoration: none;
+  }
+  .icon-btn:hover                { color: var(--text-1); background: var(--bg-surface-h); }
+  .icon-btn.accent:hover         { color: #6366f1; background: rgba(99,102,241,0.12); }
+  .icon-btn.purple-v:hover       { color: #a855f7; background: rgba(168,85,247,0.12); }
+  .icon-btn.danger-v:hover       { color: var(--danger); background: var(--danger-subtle); }
+
+  /* ── Semantic text colours ── */
+  .t1   { color: var(--text-1) !important; }
+  .t2   { color: var(--text-2) !important; }
+  .t3   { color: var(--text-3) !important; }
+  .t4   { color: var(--text-4) !important; }
+  .t-accent  { color: var(--accent) !important; }
+  .t-danger  { color: var(--danger) !important; }
+  .t-success { color: var(--success) !important; }
+  .t-warning { color: var(--warning) !important; }
+
+  /* ── Surface backgrounds ── */
+  .bg-surface   { background: var(--bg-surface) !important; }
+  .bg-surface-h { background: var(--bg-surface-h) !important; }
+  .border-theme { border-color: var(--border) !important; }
+  .divide-theme > * + * { border-top: 1px solid var(--border); }
+
+  /* ── Nav link ── */
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-3);
+    transition: color 0.2s, background 0.2s;
+    text-decoration: none;
+  }
+  .nav-link:hover   { color: var(--text-1); background: var(--bg-surface); }
+  .nav-link.active  { color: var(--accent); background: var(--accent-subtle); }
+  .nav-link.danger:hover { color: var(--danger); background: var(--danger-subtle); }
+
+  /* ── Gradient text ── */
+  .gradient-text {
+    background: linear-gradient(135deg, #6366f1, #a78bfa, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Stat icon container ── */
+  .stat-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ── Theme toggle button ── */
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    color: var(--text-3);
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+  }
+  .theme-toggle:hover { color: var(--text-1); background: var(--bg-surface-h); }
+
+  /* ── Spinner ── */
+  .spinner {
+    width: 32px; height: 32px;
+    border: 2px solid var(--accent-subtle);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+  }
+  .spinner-sm {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.25);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+}
