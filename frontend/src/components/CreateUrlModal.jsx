@@ -37,7 +37,8 @@ export default function CreateUrlModal({ onClose, onCreated }) {
         original_url: form.original_url.trim(),
         title:        form.title.trim() || undefined,
         custom_alias: form.custom_alias.trim() || undefined,
-        expires_at:   form.expires_at || undefined,
+        // Convert local datetime string → UTC ISO so Supabase stores the correct moment
+        expires_at: form.expires_at ? new Date(form.expires_at).toISOString() : undefined,
       });
       toast.success('Short URL created!');
       onCreated(data.url);
