@@ -93,7 +93,7 @@ export default function Login() {
         </div>
 
         <div style={{ marginTop: 'auto', paddingTop: 48 }}>
-          <p style={{ fontSize: 12, color: '#4B5563' }}>© 2024 Snipli · All rights reserved</p>
+          <p style={{ fontSize: 12, color: '#4B5563' }}>© 2026 Snipli · All rights reserved</p>
         </div>
       </div>
 
