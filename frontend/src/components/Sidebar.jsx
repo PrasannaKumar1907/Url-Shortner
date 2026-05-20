@@ -2,9 +2,10 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
-  Link2, LayoutDashboard, User, Settings, LogOut,
+  LayoutDashboard, Settings, LogOut,
   Sun, Moon, X, BarChart2, Globe,
 } from 'lucide-react';
+import SnipliLogo from './SnipliLogo';
 
 const NAV = [
   { label: 'Links',     icon: LayoutDashboard, to: '/dashboard' },
@@ -34,13 +35,7 @@ export default function Sidebar({ isOpen, onClose }) {
       {/* ── Logo ── */}
       <div className="flex items-center justify-between px-5 py-5 shrink-0">
         <Link to="/dashboard" className="flex items-center gap-2.5" onClick={onClose}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 8,
-            background: 'var(--sidebar-active-bar)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}>
-            <Link2 size={16} color="#fff" />
-          </div>
+          <SnipliLogo size={32} />
           <span className="brand-text">Snipli<span className="brand-dot">.</span></span>
         </Link>
         {/* Mobile close */}

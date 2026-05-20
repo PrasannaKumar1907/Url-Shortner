@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Menu, Link2 } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import SnipliLogo from './SnipliLogo';
 
 export default function AppLayout({ children }) {
   const [open, setOpen] = useState(false);
@@ -32,14 +33,8 @@ export default function AppLayout({ children }) {
           >
             <Menu size={20} />
           </button>
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <div style={{
-              width: 28, height: 28, borderRadius: 7,
-              background: 'var(--accent)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Link2 size={14} color="#fff" />
-            </div>
+          <Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+            <SnipliLogo size={28} radius={7} />
             <span style={{ fontWeight: 800, fontSize: 17, color: 'var(--text-1)' }}>
               Snipli<span style={{ color: 'var(--accent)' }}>.</span>
             </span>

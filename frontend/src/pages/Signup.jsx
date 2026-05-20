@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { Link2, Mail, Lock, User, Eye, EyeOff, Zap, BarChart2, Shield } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Zap, BarChart2, Shield } from 'lucide-react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import SnipliLogo from '../components/SnipliLogo';
 
 export default function Signup() {
   const [form, setForm]       = useState({ name: '', email: '', password: '', confirm: '' });
@@ -81,13 +82,7 @@ export default function Signup() {
 
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48 }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: 10,
-            background: '#EE6123',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Link2 size={20} color="#fff" />
-          </div>
+          <SnipliLogo size={40} radius={10} />
           <span style={{ fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>Snipli</span>
         </div>
 
@@ -132,13 +127,7 @@ export default function Signup() {
           {/* Mobile logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32, justifyContent: 'center' }}
                className="auth-mobile-logo">
-            <div style={{
-              width: 36, height: 36, borderRadius: 9,
-              background: '#EE6123',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Link2 size={18} color="#fff" />
-            </div>
+            <SnipliLogo size={36} radius={9} />
             <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-1)', letterSpacing: '-0.5px' }}>Snipli</span>
           </div>
 
