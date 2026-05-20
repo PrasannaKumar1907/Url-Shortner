@@ -243,7 +243,7 @@ export default function CreateUrlModal({ onClose, onCreated }) {
                       </div>
                       <input type="range" min="0" max="100" value={form.ab_split}
                         onChange={e => set('ab_split', Number(e.target.value))}
-                        className="w-full accent-indigo-500" />
+                        className="w-full" style={{ accentColor: 'var(--accent)' }} />
                     </div>
                   )}
                 </div>
@@ -257,7 +257,8 @@ export default function CreateUrlModal({ onClose, onCreated }) {
                     <label key={key} className="flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-colors"
                       style={{ background: form[key] ? 'var(--accent-subtle)' : 'var(--bg-surface)',
                                border: `1px solid ${form[key] ? 'var(--accent)' : 'var(--border)'}` }}>
-                      <input type="checkbox" name={key} checked={form[key]} onChange={handleChange} className="mt-0.5 accent-indigo-500" />
+                      <input type="checkbox" name={key} checked={form[key]} onChange={handleChange}
+                        className="mt-0.5" style={{ accentColor: 'var(--accent)', width: 15, height: 15 }} />
                       <div>
                         <div className="flex items-center gap-1.5 text-sm font-medium t1">
                           <Icon size={14} /> {label}

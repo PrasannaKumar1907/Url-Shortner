@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Copy, Trash2, BarChart2, Check, ExternalLink, Clock, MousePointer,
-         AlertCircle, Lock, Shuffle, Eye, Globe, Wifi, WifiOff } from 'lucide-react';
+         AlertCircle, Lock, Shuffle, Eye, Globe, Wifi, WifiOff, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { formatDistanceToNow, format, isPast } from 'date-fns';
@@ -8,18 +8,19 @@ import api from '../api/axios';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL || window.location.origin.replace('5173', '5000');
 
-function Badge({ color, bg, children }) {
+function Pill({ color, bg, children }) {
   return (
-    <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full font-medium"
-      style={{ color, background: bg }}>{children}</span>
+    <span className="badge" style={{ color, background: bg }}>
+      {children}
+    </span>
   );
 }
 
 export default function UrlCard({ url, onDelete }) {
-  const [copied, setCopied]           = useState(false);
-  const [confirmDelete, setConfirm]   = useState(false);
-  const [deleting, setDeleting]       = useState(false);
-  const [health, setHealth]           = useState(null); // null | 'checking' | {alive,statusCode,responseTime}
+  const [copied, setCopied]         = useState(false);
+  const [confirmDelete, setConfirm] = useState(false);
+  const [deleting, setDeleting]     = useState(false);
+  const [health, setHealth]         = useState(null);
 
   const shortUrl  = `${BASE_URL}/${url.short_code}`;
   const isExpired = (url.expires_at && isPast(new Date(url.expires_at))) ||
@@ -30,13 +31,13 @@ export default function UrlCard({ url, onDelete }) {
       await navigator.clipboard.writeText(shortUrl);
       setCopied(true); toast.success('Copied!');
       setTimeout(() => setCopied(false), 2000);
-    } catch { toast.error('Failed to copy'); }
+    } catch { toast.error('Copy failed'); }
   };
 
   const handleDelete = async () => {
     setDeleting(true);
-    try { await onDelete(url.id); toast.success('Deleted'); }
-    catch { toast.error('Failed to delete'); setDeleting(false); setConfirm(false); }
+    try { await onDelete(url.id); toast.success('Link deleted'); }
+    catch { toast.error('Delete failed'); setDeleting(false); setConfirm(false); }
   };
 
   const checkHealth = async () => {
@@ -48,65 +49,111 @@ export default function UrlCard({ url, onDelete }) {
   };
 
   return (
-    <div className="card p-4 sm:p-5 transition-all" style={{ opacity: isExpired ? 0.6 : 1 }}>
-      <div className="flex items-start gap-3">
+    <div className="card" style={{
+      padding: '16px 20px',
+      opacity: isExpired ? 0.65 : 1,
+      transition: 'box-shadow 0.2s',
+    }}>
+      <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
 
-        {/* Left: info */}
-        <div className="flex-1 min-w-0">
-          {/* Short URL + badges */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <a href={shortUrl} target="_blank" rel="noopener noreferrer"
-               className="text-sm font-semibold hover:underline truncate max-w-xs"
-               style={{ color: 'var(--accent)' }}>
-              {shortUrl}
+        {/* Favicon */}
+        <div style={{
+          width: 36, height: 36, borderRadius: 8, flexShrink: 0, marginTop: 2,
+          background: 'var(--bg-surface)', border: '1px solid var(--border)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <img
+            src={`https://www.google.com/s2/favicons?domain=${new URL(url.original_url).hostname}&sz=32`}
+            alt=""
+            style={{ width: 18, height: 18, borderRadius: 3 }}
+            onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }}
+          />
+          <div style={{ display: 'none', alignItems: 'center', justifyContent: 'center' }}>
+            <Globe size={14} style={{ color: 'var(--text-4)' }} />
+          </div>
+        </div>
+
+        {/* Content */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Short URL row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
+            <a
+              href={shortUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent)', textDecoration: 'none' }}
+              onMouseEnter={e => e.target.style.textDecoration = 'underline'}
+              onMouseLeave={e => e.target.style.textDecoration = 'none'}
+            >
+              {shortUrl.replace(/^https?:\/\//, '')}
             </a>
-            {isExpired          && <Badge color="#f59e0b" bg="rgba(245,158,11,0.1)"><AlertCircle size={10} />Inactive</Badge>}
-            {url.password_hash  && <Badge color="#8b5cf6" bg="rgba(139,92,246,0.1)"><Lock size={10} />Protected</Badge>}
-            {url.ab_url         && <Badge color="#06b6d4" bg="rgba(6,182,212,0.1)"><Shuffle size={10} />A/B Test</Badge>}
-            {url.preview_enabled && <Badge color="#10b981" bg="rgba(16,185,129,0.1)"><Eye size={10} />Preview</Badge>}
-            {url.is_public      && <Badge color="#6366f1" bg="rgba(99,102,241,0.1)"><Globe size={10} />Public</Badge>}
-            {url.custom_alias   && <Badge color="#a855f7" bg="rgba(168,85,247,0.1)">Custom</Badge>}
+
+            {/* Badges */}
+            {isExpired        && <Pill color="#92400E" bg="#FEF3C7"><AlertCircle size={9} />Inactive</Pill>}
+            {url.password_hash && <Pill color="#5B21B6" bg="#EDE9FE"><Lock size={9} />Protected</Pill>}
+            {url.ab_url        && <Pill color="#0E7490" bg="#CFFAFE"><Shuffle size={9} />A/B</Pill>}
+            {url.preview_enabled && <Pill color="#065F46" bg="#D1FAE5"><Eye size={9} />Preview</Pill>}
+            {url.is_public     && <Pill color="#1D4ED8" bg="#DBEAFE"><Globe size={9} />Public</Pill>}
+            {url.custom_alias  && <Pill color="#7C3AED" bg="#F3E8FF">Custom</Pill>}
           </div>
 
           {/* Title */}
-          {url.title && <p className="text-sm font-medium t1 mt-0.5 truncate">{url.title}</p>}
+          {url.title && (
+            <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-1)', marginBottom: 2,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {url.title}
+            </p>
+          )}
 
           {/* Original URL */}
-          <a href={url.original_url} target="_blank" rel="noopener noreferrer"
-             className="flex items-center gap-1 mt-0.5 group text-xs t3 hover:t2 transition-colors">
-            <span className="truncate max-w-xs sm:max-w-sm">
-              {url.original_url.length > 65 ? url.original_url.slice(0, 65) + '…' : url.original_url}
+          <a
+            href={url.original_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontSize: 12, color: 'var(--text-3)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--text-2)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}
+          >
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90%' }}>
+              {url.original_url.length > 70 ? url.original_url.slice(0, 70) + '…' : url.original_url}
             </span>
-            <ExternalLink size={10} className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <ExternalLink size={10} style={{ flexShrink: 0 }} />
           </a>
 
-          {/* Stats row */}
-          <div className="flex items-center gap-3 mt-2 text-xs t3 flex-wrap">
-            <span className="flex items-center gap-1">
-              <Clock size={10} />
+          {/* Meta row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 8, flexWrap: 'wrap' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-3)' }}>
+              <Clock size={11} />
               {formatDistanceToNow(new Date(url.created_at), { addSuffix: true })}
             </span>
-            <span className="flex items-center gap-1">
-              <MousePointer size={10} />
-              <strong className="t2">{url.total_clicks ?? 0}</strong>
-              {url.max_clicks ? `/${url.max_clicks}` : ''} clicks
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-3)' }}>
+              <MousePointer size={11} />
+              <strong style={{ color: 'var(--text-2)', fontWeight: 600 }}>{url.total_clicks ?? 0}</strong>
+              {url.max_clicks ? <span style={{ color: 'var(--text-4)' }}>/{url.max_clicks}</span> : ''}
+              &nbsp;clicks
             </span>
-            {url.last_clicked_at && (
-              <span className="hidden sm:inline">
-                Last: {format(new Date(url.last_clicked_at), 'MMM d')}
+            {url.expires_at && (
+              <span style={{ fontSize: 12, color: isPast(new Date(url.expires_at)) ? 'var(--danger)' : 'var(--warning)' }}>
+                Expires {format(new Date(url.expires_at), 'MMM d, yyyy')}
               </span>
             )}
-            {/* Health indicator */}
+            {/* Health result */}
             {health && health !== 'checking' && (
-              <span className="flex items-center gap-1"
-                style={{ color: health.alive ? 'var(--success)' : 'var(--danger)' }}>
-                {health.alive ? <Wifi size={10} /> : <WifiOff size={10} />}
+              <span style={{
+                display: 'flex', alignItems: 'center', gap: 4, fontSize: 12,
+                color: health.alive ? 'var(--success)' : 'var(--danger)',
+              }}>
+                {health.alive ? <Wifi size={11} /> : <WifiOff size={11} />}
                 {health.alive ? `${health.statusCode} · ${health.responseTime}ms` : 'Unreachable'}
               </span>
             )}
             {health === 'checking' && (
-              <span className="flex items-center gap-1 t3">
-                <span className="w-2 h-2 border border-current border-t-transparent rounded-full animate-spin inline-block" />
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-3)' }}>
+                <span style={{
+                  width: 10, height: 10, border: '1.5px solid currentColor',
+                  borderTopColor: 'transparent', borderRadius: '50%',
+                  animation: 'spin 0.7s linear infinite', display: 'inline-block',
+                }} />
                 Checking…
               </span>
             )}
@@ -114,39 +161,55 @@ export default function UrlCard({ url, onDelete }) {
 
           {/* Tags */}
           {url.tags?.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
+            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 8 }}>
               {url.tags.map(t => (
-                <span key={t} className="text-xs px-1.5 py-0.5 rounded-full"
-                  style={{ background: 'var(--bg-surface)', color: 'var(--text-3)', border: '1px solid var(--border)' }}>
-                  #{t}
-                </span>
+                <span key={t} style={{
+                  fontSize: 11, padding: '2px 8px', borderRadius: 20,
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-3)',
+                }}>#{t}</span>
               ))}
             </div>
           )}
         </div>
 
-        {/* Right: actions */}
-        <div className="flex items-center gap-1 shrink-0">
-          <button onClick={handleCopy} title="Copy" className="icon-btn accent">
+        {/* Actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+          <button onClick={handleCopy} title="Copy short URL" className="icon-btn accent">
             {copied ? <Check size={15} style={{ color: 'var(--success)' }} /> : <Copy size={15} />}
           </button>
-          <button onClick={checkHealth} title="Check if URL is alive" className="icon-btn"
-            disabled={health === 'checking'}>
+          <button
+            onClick={checkHealth}
+            title="Check if URL is alive"
+            className="icon-btn info-v"
+            disabled={health === 'checking'}
+          >
             <Wifi size={15} />
           </button>
-          <Link to={`/analytics/${url.id}`} title="Analytics" className="icon-btn purple-v">
+          <Link to={`/analytics/${url.id}`} title="View analytics" className="icon-btn">
             <BarChart2 size={15} />
           </Link>
+
           {confirmDelete ? (
-            <div className="flex items-center gap-1">
-              <button onClick={handleDelete} disabled={deleting}
-                className="px-2 py-1 text-xs rounded-lg font-medium"
-                style={{ background: 'var(--danger-subtle)', color: 'var(--danger)' }}>
-                {deleting ? '…' : 'Confirm'}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                style={{
+                  padding: '4px 10px', fontSize: 12, borderRadius: 6, cursor: 'pointer',
+                  background: 'var(--danger)', color: '#fff', border: 'none', fontWeight: 600,
+                }}
+              >
+                {deleting ? '…' : 'Delete'}
               </button>
-              <button onClick={() => setConfirm(false)}
-                className="px-2 py-1 text-xs rounded-lg"
-                style={{ background: 'var(--bg-surface)', color: 'var(--text-3)' }}>
+              <button
+                onClick={() => setConfirm(false)}
+                style={{
+                  padding: '4px 10px', fontSize: 12, borderRadius: 6, cursor: 'pointer',
+                  background: 'var(--bg-surface)', color: 'var(--text-3)', border: '1px solid var(--border)',
+                }}
+              >
                 Cancel
               </button>
             </div>

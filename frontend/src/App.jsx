@@ -8,6 +8,7 @@ import Signup    from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
 import Bio       from './pages/Bio';
+import Account   from './pages/Account';
 
 function ToasterWithTheme() {
   const { isDark } = useTheme();
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="/bio/:username" element={<Bio />} />
             <Route path="/dashboard"    element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/analytics/:id" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+            <Route path="/account"      element={<ProtectedRoute><Account /></ProtectedRoute>} />
             <Route path="/"  element={<Navigate to="/dashboard" replace />} />
             <Route path="*"  element={<Navigate to="/dashboard" replace />} />
           </Routes>

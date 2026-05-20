@@ -1,27 +1,26 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, Link2, TrendingUp, MousePointer, Download, Layers, User } from 'lucide-react';
+import { Plus, Search, Link2, TrendingUp, MousePointer, Download, Layers } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import { format } from 'date-fns';
+import AppLayout from '../components/AppLayout';
 import UrlCard from '../components/UrlCard';
 import CreateUrlModal from '../components/CreateUrlModal';
 import BulkShortenModal from '../components/BulkShortenModal';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { format } from 'date-fns';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL || window.location.origin.replace('5173', '5000');
 
-function StatCard({ icon: Icon, label, value, iconBg, iconColor }) {
+function StatCard({ icon: Icon, label, value, color, bg }) {
   return (
-    <div className="card p-5">
-      <div className="flex items-center gap-3">
-        <div className="stat-icon" style={{ background: iconBg }}>
-          <Icon size={20} style={{ color: iconColor }} />
+    <div className="card" style={{ padding: '18px 20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div className="stat-icon" style={{ background: bg }}>
+          <Icon size={18} style={{ color }} />
         </div>
         <div>
-          <p className="text-2xl font-bold t1">{value}</p>
-          <p className="text-xs t3">{label}</p>
+          <p style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-1)', lineHeight: 1 }}>{value}</p>
+          <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 3 }}>{label}</p>
         </div>
       </div>
     </div>
@@ -29,32 +28,36 @@ function StatCard({ icon: Icon, label, value, iconBg, iconColor }) {
 }
 
 export default function Dashboard() {
-  const { user }  = useAuth();
+  const { user } = useAuth();
   const [urls, setUrls]           = useState([]);
   const [loading, setLoading]     = useState(true);
-  const [showCreate, setShowCreate]   = useState(false);
-  const [showBulk, setShowBulk]       = useState(false);
-  const [search, setSearch]           = useState('');
-  const [activeTag, setActiveTag]     = useState(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [showBulk, setShowBulk]   = useState(false);
+  const [search, setSearch]       = useState('');
+  const [activeTag, setActiveTag] = useState(null);
 
   const fetchUrls = useCallback(async () => {
-    try { const { data } = await api.get('/urls'); setUrls(data.urls || []); }
-    catch { toast.error('Failed to load URLs'); }
+    try {
+      const { data } = await api.get('/urls');
+      setUrls(data.urls || []);
+    } catch { toast.error('Failed to load links'); }
     finally { setLoading(false); }
   }, []);
+
   useEffect(() => { fetchUrls(); }, [fetchUrls]);
 
   const handleCreated = (newUrls) => {
     const list = Array.isArray(newUrls) ? newUrls : [newUrls];
     setUrls(prev => [...list, ...prev]);
   };
+
   const handleDelete = async (id) => {
     await api.delete(`/urls/${id}`);
     setUrls(prev => prev.filter(u => u.id !== id));
   };
 
-  // All unique tags across all URLs
   const allTags = [...new Set(urls.flatMap(u => u.tags || []))].sort();
+  const totalClicks = urls.reduce((s, u) => s + (Number(u.total_clicks) || 0), 0);
 
   const filtered = urls.filter(u => {
     const matchSearch = !search || [u.original_url, u.short_code, u.title, ...(u.tags || [])]
@@ -63,20 +66,15 @@ export default function Dashboard() {
     return matchSearch && matchTag;
   });
 
-  const totalClicks = urls.reduce((s, u) => s + (Number(u.total_clicks) || 0), 0);
-
   const exportCSV = () => {
     const headers = ['Short URL','Original URL','Title','Tags','Clicks','Created','Expires','Password','Max Clicks'];
     const rows = urls.map(u => [
       `${BASE_URL}/${u.short_code}`,
-      u.original_url,
-      u.title || '',
-      (u.tags || []).join('; '),
-      u.total_clicks || 0,
+      u.original_url, u.title || '',
+      (u.tags || []).join('; '), u.total_clicks || 0,
       format(new Date(u.created_at), 'yyyy-MM-dd HH:mm'),
       u.expires_at ? format(new Date(u.expires_at), 'yyyy-MM-dd HH:mm') : '',
-      u.password_hash ? 'Yes' : 'No',
-      u.max_clicks || '',
+      u.password_hash ? 'Yes' : 'No', u.max_clicks || '',
     ]);
     const csv = [headers, ...rows]
       .map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(','))
@@ -84,125 +82,148 @@ export default function Dashboard() {
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `snipli-links-${format(new Date(),'yyyy-MM-dd')}.csv`;
+    a.download = `snipli-${format(new Date(),'yyyy-MM-dd')}.csv`;
     a.click();
-    toast.success('CSV exported!');
+    toast.success('CSV exported');
   };
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <AppLayout>
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl font-bold t1">
-              Welcome back, <span className="gradient-text">{user?.name?.split(' ')[0] || 'there'}</span>
-            </h1>
-            <p className="t3 mt-1">Manage and track all your short links</p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Link to={`/bio/${encodeURIComponent(user?.name || '')}`}
-              className="btn-secondary flex items-center gap-1.5 px-4 py-2 text-sm shrink-0">
-              <User size={15} /> My Bio Page
-            </Link>
-            <button onClick={exportCSV}
-              className="btn-secondary flex items-center gap-1.5 px-4 py-2 text-sm shrink-0">
-              <Download size={15} /> Export CSV
-            </button>
-            <button onClick={() => setShowBulk(true)}
-              className="btn-secondary flex items-center gap-1.5 px-4 py-2 text-sm shrink-0">
-              <Layers size={15} /> Bulk Shorten
-            </button>
-            <button onClick={() => setShowCreate(true)}
-              className="btn-primary flex items-center gap-2 px-5 py-2 shrink-0">
-              <Plus size={18} /> New Link
-            </button>
-          </div>
+      {/* ── Page header ── */}
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Links</h1>
+          <p className="page-subtitle">
+            {urls.length} link{urls.length !== 1 ? 's' : ''} · {totalClicks.toLocaleString()} total clicks
+          </p>
         </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <StatCard icon={Link2}        label="Total Links"       value={urls.length}
-            iconBg="rgba(99,102,241,0.12)"  iconColor="#6366f1" />
-          <StatCard icon={MousePointer} label="Total Clicks"      value={totalClicks.toLocaleString()}
-            iconBg="rgba(168,85,247,0.12)"  iconColor="#a855f7" />
-          <StatCard icon={TrendingUp}   label="Avg. Clicks / Link" value={urls.length ? (totalClicks / urls.length).toFixed(1) : '0'}
-            iconBg="rgba(16,185,129,0.12)"  iconColor="#10b981" />
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button onClick={exportCSV} className="btn-secondary" style={{ fontSize: 13 }}>
+            <Download size={14} /> Export CSV
+          </button>
+          <button onClick={() => setShowBulk(true)} className="btn-secondary" style={{ fontSize: 13 }}>
+            <Layers size={14} /> Bulk
+          </button>
+          <button onClick={() => setShowCreate(true)} className="btn-primary">
+            <Plus size={16} /> Create Link
+          </button>
         </div>
+      </div>
 
-        {/* Tag filter chips */}
-        {allTags.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap mb-4">
-            <span className="text-xs t3">Filter:</span>
-            <button onClick={() => setActiveTag(null)}
-              className="text-xs px-3 py-1 rounded-full transition-colors"
-              style={{ background: !activeTag ? 'var(--accent)' : 'var(--bg-surface)',
-                       color: !activeTag ? '#fff' : 'var(--text-3)',
-                       border: '1px solid var(--border)' }}>
-              All
+      {/* ── Stats row ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 24 }}>
+        <StatCard icon={Link2}        label="Total Links"        value={urls.length}
+          color="var(--accent)"   bg="var(--accent-subtle)" />
+        <StatCard icon={MousePointer} label="Total Clicks"       value={totalClicks.toLocaleString()}
+          color="var(--success)"  bg="var(--success-subtle)" />
+        <StatCard icon={TrendingUp}   label="Avg. Clicks / Link" value={urls.length ? (totalClicks / urls.length).toFixed(1) : '0'}
+          color="var(--info, #3B82F6)"   bg="var(--info-subtle, rgba(59,130,246,0.1))" />
+      </div>
+
+      {/* ── Search + Tag filters ── */}
+      <div className="card" style={{ padding: '14px 16px', marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          {/* Search */}
+          <div style={{ flex: '1 1 220px', position: 'relative', minWidth: 180 }}>
+            <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-4)' }} />
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search links…"
+              className="input-field"
+              style={{ paddingLeft: '2.25rem', height: 38, fontSize: 13 }}
+            />
+          </div>
+
+          {/* Tag chips */}
+          {allTags.length > 0 && (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+              <button
+                onClick={() => setActiveTag(null)}
+                style={{
+                  fontSize: 12, padding: '4px 12px', borderRadius: 20, cursor: 'pointer',
+                  border: '1px solid var(--border)',
+                  background: !activeTag ? 'var(--accent)' : 'transparent',
+                  color: !activeTag ? '#fff' : 'var(--text-3)',
+                  fontWeight: !activeTag ? 600 : 400,
+                }}
+              >All</button>
+              {allTags.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+                  style={{
+                    fontSize: 12, padding: '4px 12px', borderRadius: 20, cursor: 'pointer',
+                    border: `1px solid ${activeTag === tag ? 'var(--accent)' : 'var(--border)'}`,
+                    background: activeTag === tag ? 'var(--accent-subtle)' : 'transparent',
+                    color: activeTag === tag ? 'var(--accent)' : 'var(--text-3)',
+                    fontWeight: activeTag === tag ? 600 : 400,
+                  }}
+                >#{tag}</button>
+              ))}
+            </div>
+          )}
+
+          {(search || activeTag) && (
+            <button onClick={() => { setSearch(''); setActiveTag(null); }} className="btn-ghost" style={{ fontSize: 12 }}>
+              Clear
             </button>
-            {allTags.map(tag => (
-              <button key={tag} onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-                className="text-xs px-3 py-1 rounded-full transition-colors"
-                style={{ background: activeTag === tag ? 'var(--accent-subtle)' : 'var(--bg-surface)',
-                         color: activeTag === tag ? 'var(--accent)' : 'var(--text-3)',
-                         border: `1px solid ${activeTag === tag ? 'var(--accent)' : 'var(--border)'}` }}>
-                #{tag}
+          )}
+        </div>
+      </div>
+
+      {/* ── Link list ── */}
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
+          <div className="spinner" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '80px 0' }}>
+          {search || activeTag ? (
+            <>
+              <Search size={36} style={{ margin: '0 auto 12px', color: 'var(--text-4)' }} />
+              <p style={{ fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>No links match</p>
+              <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 16 }}>Try adjusting your search or filters</p>
+              <button onClick={() => { setSearch(''); setActiveTag(null); }} className="btn-secondary">
+                Clear filters
               </button>
-            ))}
-          </div>
-        )}
-
-        {/* Search */}
-        <div className="relative mb-4">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 t4 pointer-events-none" />
-          <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search by URL, alias, title, or tag…"
-            className="input-field" />
+            </>
+          ) : (
+            <>
+              <div style={{
+                width: 64, height: 64, borderRadius: 16, background: 'var(--accent-subtle)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px',
+              }}>
+                <Link2 size={28} style={{ color: 'var(--accent)' }} />
+              </div>
+              <p style={{ fontWeight: 700, fontSize: 17, color: 'var(--text-1)', marginBottom: 6 }}>
+                No links yet
+              </p>
+              <p style={{ fontSize: 14, color: 'var(--text-3)', marginBottom: 20 }}>
+                Create your first short link and start tracking clicks
+              </p>
+              <button onClick={() => setShowCreate(true)} className="btn-primary">
+                <Plus size={16} /> Create your first link
+              </button>
+            </>
+          )}
         </div>
-
-        {/* URL List */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20"><div className="spinner" /></div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-20">
-            {search || activeTag ? (
-              <>
-                <Search size={40} className="mx-auto t4 mb-3" />
-                <p className="t3">No links match your filters</p>
-                <button onClick={() => { setSearch(''); setActiveTag(null); }}
-                  className="text-sm mt-2" style={{ color: 'var(--accent)' }}>
-                  Clear filters
-                </button>
-              </>
-            ) : (
-              <>
-                <Link2 size={40} className="mx-auto t4 mb-3" />
-                <p className="font-medium t1">No short URLs yet</p>
-                <p className="text-sm t3 mt-1 mb-4">Create your first short link to get started</p>
-                <button onClick={() => setShowCreate(true)} className="btn-primary px-5 py-2">
-                  Create your first link
-                </button>
-              </>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <p className="text-xs t3">
-              {filtered.length} link{filtered.length !== 1 ? 's' : ''}
-              {(search || activeTag) ? ' matching filters' : ''}
-            </p>
-            {filtered.map(url => (
-              <UrlCard key={url.id} url={url} onDelete={handleDelete} />
-            ))}
-          </div>
-        )}
-      </main>
+      ) : (
+        <div style={{ display: 'grid', gap: 10 }}>
+          <p style={{ fontSize: 12, color: 'var(--text-4)', marginBottom: 2 }}>
+            {filtered.length} link{filtered.length !== 1 ? 's' : ''}
+            {(search || activeTag) ? ' found' : ''}
+          </p>
+          {filtered.map(url => (
+            <UrlCard key={url.id} url={url} onDelete={handleDelete} />
+          ))}
+        </div>
+      )}
 
       {showCreate && <CreateUrlModal onClose={() => setShowCreate(false)} onCreated={handleCreated} />}
       {showBulk   && <BulkShortenModal onClose={() => setShowBulk(false)} onCreated={handleCreated} />}
-    </div>
+    </AppLayout>
   );
 }

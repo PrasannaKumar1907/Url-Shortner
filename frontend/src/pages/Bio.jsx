@@ -59,7 +59,7 @@ export default function Bio() {
 
         {/* Profile header */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl font-bold text-white mx-auto mb-4">
+          <div className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white mx-auto mb-4" style={{ background: '#EE6123' }}>
             {user.name?.[0]?.toUpperCase() || '?'}
           </div>
           <h1 className="text-2xl font-bold t1">{user.name}</h1>
@@ -144,7 +144,7 @@ export default function Bio() {
         {!authUser && (
           <div className="text-center mt-10">
             <Link to="/signup" className="inline-flex items-center gap-2 text-sm t3 hover:t1 transition-colors">
-              <div className="w-5 h-5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded flex items-center justify-center">
+              <div className="w-5 h-5 rounded flex items-center justify-center" style={{ background: '#EE6123' }}>
                 <Link2 size={11} className="text-white" />
               </div>
               Create your own Snipli bio page →

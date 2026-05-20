@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { Link2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Link2, Mail, Lock, Eye, EyeOff, Zap, BarChart2, Shield } from 'lucide-react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -13,7 +13,6 @@ export default function Login() {
   const { login, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Already logged in → go straight to dashboard
   useEffect(() => {
     if (!authLoading && user) navigate('/dashboard', { replace: true });
   }, [user, authLoading, navigate]);
@@ -46,30 +45,103 @@ export default function Login() {
     if (errors[e.target.name]) setErrors(er => ({ ...er, [e.target.name]: '' }));
   };
 
+  const features = [
+    { icon: Zap,       text: 'Shorten links in seconds' },
+    { icon: BarChart2, text: 'Track clicks & analytics' },
+    { icon: Shield,    text: 'Password & expiry controls' },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
+
+      {/* ── Left panel (brand) ── */}
+      <div style={{
+        flex: '0 0 420px',
+        background: '#111827',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: '60px 48px',
+      }} className="auth-left">
 
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <Link2 size={20} className="text-white" />
-            </div>
-            <span className="text-2xl font-bold gradient-text">Snipli</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48 }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: 10,
+            background: '#EE6123',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Link2 size={20} color="#fff" />
           </div>
-          <h1 className="text-2xl font-bold t1">Welcome back</h1>
-          <p className="t3 mt-1">Sign in to manage your short links</p>
+          <span style={{ fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>Snipli</span>
         </div>
 
-        <div className="card p-6 sm:p-8">
-          <form onSubmit={handleSubmit} noValidate className="space-y-4">
+        <h2 style={{ fontSize: 28, fontWeight: 700, color: '#fff', marginBottom: 12, lineHeight: 1.3 }}>
+          The smarter way to share links
+        </h2>
+        <p style={{ fontSize: 15, color: '#9CA3AF', marginBottom: 40, lineHeight: 1.6 }}>
+          Short links, powerful analytics, and everything your team needs in one place.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {features.map(({ icon: Icon, text }) => (
+            <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 8,
+                background: 'rgba(238,97,35,0.15)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <Icon size={17} color="#EE6123" />
+              </div>
+              <span style={{ fontSize: 14, color: '#D1D5DB' }}>{text}</span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 'auto', paddingTop: 48 }}>
+          <p style={{ fontSize: 12, color: '#4B5563' }}>© 2024 Snipli · All rights reserved</p>
+        </div>
+      </div>
+
+      {/* ── Right panel (form) ── */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '40px 24px',
+        background: 'var(--bg-page)',
+      }}>
+        <div style={{ width: '100%', maxWidth: 400 }}>
+
+          {/* Mobile logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32, justifyContent: 'center' }}
+               className="auth-mobile-logo">
+            <div style={{
+              width: 36, height: 36, borderRadius: 9,
+              background: '#EE6123',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Link2 size={18} color="#fff" />
+            </div>
+            <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-1)', letterSpacing: '-0.5px' }}>Snipli</span>
+          </div>
+
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-1)', marginBottom: 6 }}>
+            Welcome back
+          </h1>
+          <p style={{ fontSize: 14, color: 'var(--text-3)', marginBottom: 28 }}>
+            Sign in to manage your short links
+          </p>
+
+          <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium t2 mb-1.5">Email</label>
-              <div className="relative">
-                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 t4 pointer-events-none" />
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text-2)', marginBottom: 6 }}>
+                Email address
+              </label>
+              <div style={{ position: 'relative' }}>
+                <Mail size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-4)' }} />
                 <input
                   type="email" name="email"
                   value={form.email} onChange={handleChange}
@@ -78,14 +150,16 @@ export default function Login() {
                   autoComplete="email"
                 />
               </div>
-              {errors.email && <p className="mt-1 text-xs t-danger">{errors.email}</p>}
+              {errors.email && <p style={{ fontSize: 11, color: 'var(--danger)', marginTop: 4 }}>{errors.email}</p>}
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium t2 mb-1.5">Password</label>
-              <div className="relative">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 t4 pointer-events-none" />
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text-2)', marginBottom: 6 }}>
+                Password
+              </label>
+              <div style={{ position: 'relative' }}>
+                <Lock size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-4)' }} />
                 <input
                   type={showPw ? 'text' : 'password'} name="password"
                   value={form.password} onChange={handleChange}
@@ -96,25 +170,27 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPw(s => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 t4 hover:t2 transition-colors"
-                  style={{ color: 'var(--text-4)' }}
+                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+                           color: 'var(--text-4)', background: 'none', border: 'none', cursor: 'pointer' }}
                 >
-                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
-              {errors.password && <p className="mt-1 text-xs t-danger">{errors.password}</p>}
+              {errors.password && <p style={{ fontSize: 11, color: 'var(--danger)', marginTop: 4 }}>{errors.password}</p>}
             </div>
 
-            <button type="submit" disabled={loading} className="btn-primary w-full mt-6 py-2.5">
+            <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', padding: '11px 0', marginTop: 4, fontSize: 15 }}>
               {loading
-                ? <span className="flex items-center justify-center gap-2"><span className="spinner-sm" />Signing in…</span>
+                ? <><span className="spinner-sm" />Signing in…</>
                 : 'Sign In'}
             </button>
           </form>
 
-          <p className="text-center text-sm t3 mt-6">
+          <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-3)', marginTop: 24 }}>
             Don't have an account?{' '}
-            <Link to="/signup" className="text-indigo-500 hover:text-indigo-400 font-medium">Create one</Link>
+            <Link to="/signup" style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}>
+              Create one free
+            </Link>
           </p>
         </div>
       </div>
