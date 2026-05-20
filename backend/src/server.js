@@ -3,8 +3,9 @@ const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
-const authRoutes = require('./routes/auth');
-const urlRoutes = require('./routes/urls');
+const authRoutes     = require('./routes/auth');
+const urlRoutes      = require('./routes/urls');
+const bioRoutes      = require('./routes/bio');
 const redirectRoutes = require('./routes/redirect');
 
 const app = express();
@@ -40,6 +41,7 @@ const authLimiter = rateLimit({
 // Routes
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/urls', apiLimiter, urlRoutes);
+app.use('/api/bio',  apiLimiter, bioRoutes);
 
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));

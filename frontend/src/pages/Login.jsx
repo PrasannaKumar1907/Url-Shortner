@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { Link2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
@@ -10,8 +10,13 @@ export default function Login() {
   const [errors, setErrors]   = useState({});
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw]   = useState(false);
-  const { login }   = useAuth();
-  const navigate    = useNavigate();
+  const { login, user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+
+  // Already logged in → go straight to dashboard
+  useEffect(() => {
+    if (!authLoading && user) navigate('/dashboard', { replace: true });
+  }, [user, authLoading, navigate]);
 
   const validate = () => {
     const e = {};
