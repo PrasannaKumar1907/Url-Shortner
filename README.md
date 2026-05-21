@@ -2,6 +2,11 @@
 
 > A modern, feature-rich URL shortener with analytics, password protection, A/B testing, bio pages, and more.
 
+- Git repo: https://github.com/PrasannaKumar1907/Url-Shortner
+- Live Frontend: https://snipl-url.vercel.app
+- Live Backend: https://url-mini.vercel.app/
+- Demo Video: https://www.loom.com/share/d93fed4b79674c1696e3d6be16a0bc10
+
 ![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)
